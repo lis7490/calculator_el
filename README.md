@@ -1,0 +1,411 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+import math
+
+class CurrentCalculator:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Калькулятор тока")
+        self.root.geometry("800x600")
+        
+        # Создание вкладок
+        self.tab_control = ttk.Notebook(root)
+        
+        # Вкладка главного меню
+        self.tab_main = ttk.Frame(self.tab_control)
+        self.tab_control.add(self.tab_main, text='Главное меню')
+        
+        # Вкладка однофазного тока
+        self.tab_single_phase = ttk.Frame(self.tab_control)
+        self.tab_control.add(self.tab_single_phase, text='Однофазный ток')
+        
+        # Вкладка трехфазного тока
+        self.tab_three_phase = ttk.Frame(self.tab_control)
+        self.tab_control.add(self.tab_three_phase, text='Трехфазный ток')
+
+        # Общий косинус
+        self.tab_cosinus = ttk.Frame(self.tab_control)
+        self.tab_control.add(self.tab_cosinus, text='Общий косинус')
+
+        
+        self.tab_control.pack(expand=1, fill='both')
+        
+        self.setup_main_tab()
+        self.setup_single_phase_tab()
+        self.setup_three_phase_tab()
+        self.setup_cosinus_tab()
+    
+    def setup_main_tab(self):
+        """Настройка главной вкладки с кнопками"""
+        label = tk.Label(self.tab_main, text="Выберите тип расчета:", 
+                        font=("Arial", 14))
+        label.pack(pady=20)
+        
+        # Кнопка для однофазного тока
+        btn_single = tk.Button(self.tab_main, text="Расчет однофазного тока",
+                              command=self.show_single_phase,
+                              font=("Arial", 12), width=20, height=2)
+        btn_single.pack(pady=10)
+        
+        # Кнопка для трехфазного тока
+        btn_three = tk.Button(self.tab_main, text="Расчет трехфазного тока",
+                             command=self.show_three_phase,
+                             font=("Arial", 12), width=20, height=2)
+        btn_three.pack(pady=10)
+
+        # Кнопка для косинуса
+        btn_three = tk.Button(self.tab_main, text="Расчет общего косинуса",
+                             command=self.show_cosinus,
+                             font=("Arial", 12), width=20, height=2)
+        btn_three.pack(pady=10)
+        
+        # Кнопка сброса всех данных
+        reset_btn = tk.Button(self.tab_main, text="Сброс всех данных",
+                            command=self.reset_all_data,
+                            font=("Arial", 10), bg="lightcoral")
+        reset_btn.pack(pady=20)
+
+        # Информация о программе
+        info_label = tk.Label(self.tab_main, 
+                             text="Помощь проектировщику электрику.\n"
+                                  "Ступников Дмитрий",
+                             font=("Arial", 10), fg="black")
+        info_label.pack(side=tk.BOTTOM, pady=10)
+    
+    def setup_single_phase_tab(self):
+        """Настройка вкладки для однофазного тока"""
+        # Заголовок
+        title_label = tk.Label(self.tab_single_phase, 
+                              text="Расчет однофазного тока",
+                              font=("Arial", 16, "bold"))
+        title_label.pack(pady=10)
+        
+        # Формула
+        formula_label = tk.Label(self.tab_single_phase,
+                               text="Формула: I = P / (U × cos(φ))",
+                               font=("Arial", 12), fg="blue")
+        formula_label.pack(pady=5)
+        
+        # Поля ввода
+        input_frame = tk.Frame(self.tab_single_phase)
+        input_frame.pack(pady=20)
+        
+        # Мощность
+        tk.Label(input_frame, text="Мощность P (Вт):", font=("Arial", 10)).grid(row=0, column=0, sticky="w", pady=5)
+        self.power_single = tk.Entry(input_frame, font=("Arial", 10), width=15)
+        self.power_single.grid(row=0, column=1, pady=5, padx=10)
+        tk.Label(input_frame, text="Вт").grid(row=0, column=2, sticky="w", pady=5)
+        
+        # Напряжение
+        tk.Label(input_frame, text="Напряжение U (В):", font=("Arial", 10)).grid(row=1, column=0, sticky="w", pady=5)
+        self.voltage_single = tk.Entry(input_frame, font=("Arial", 10), width=15)
+        self.voltage_single.insert(0, "220")  # Значение по умолчанию
+        self.voltage_single.grid(row=1, column=1, pady=5, padx=10)
+        tk.Label(input_frame, text="В").grid(row=1, column=2, sticky="w", pady=5)
+        
+        # Косинус фи
+        tk.Label(input_frame, text="cos(φ):", font=("Arial", 10)).grid(row=2, column=0, sticky="w", pady=5)
+        self.cos_phi_single = tk.Entry(input_frame, font=("Arial", 10), width=15)
+        self.cos_phi_single.insert(0, "0.8")  # Значение по умолчанию
+        self.cos_phi_single.grid(row=2, column=1, pady=5, padx=10)
+        
+        # Фрейм для кнопок
+        button_frame = tk.Frame(self.tab_single_phase)
+        button_frame.pack(pady=10)
+        
+        # Кнопка расчета
+        calc_btn = tk.Button(button_frame, text="Рассчитать ток",
+                           command=self.calculate_single_phase,
+                           font=("Arial", 12), bg="lightblue", width=15)
+        calc_btn.grid(row=0, column=0, padx=10)
+        
+        # Кнопка сброса
+        reset_btn = tk.Button(button_frame, text="Сброс",
+                            command=self.reset_single_phase,
+                            font=("Arial", 12), bg="lightcoral", width=15)
+        reset_btn.grid(row=0, column=1, padx=10)
+        
+        # Поле результата
+        self.result_single = tk.Label(self.tab_single_phase, text="Результат: ",
+                                     font=("Arial", 12, "bold"), fg="green")
+        self.result_single.pack(pady=10)
+        
+        # Кнопка возврата
+        back_btn = tk.Button(self.tab_single_phase, text="Назад в меню",
+                           command=self.show_main,
+                           font=("Arial", 10))
+        back_btn.pack(side=tk.BOTTOM, pady=10)
+
+    
+    def setup_three_phase_tab(self):
+        """Настройка вкладки для трехфазного тока"""
+        # Заголовок
+        title_label = tk.Label(self.tab_three_phase, 
+                              text="Расчет трехфазного тока",
+                              font=("Arial", 16, "bold"))
+        title_label.pack(pady=10)
+        
+        # Формула
+        formula_label = tk.Label(self.tab_three_phase,
+                               text="Формула: I = P / (√3 × U × cos(φ))",
+                               font=("Arial", 12), fg="blue")
+        formula_label.pack(pady=5)
+        
+        # Поля ввода
+        input_frame = tk.Frame(self.tab_three_phase)
+        input_frame.pack(pady=20)
+        
+        # Мощность
+        tk.Label(input_frame, text="Мощность P (Вт):", font=("Arial", 10)).grid(row=0, column=0, sticky="w", pady=5)
+        self.power_three = tk.Entry(input_frame, font=("Arial", 10), width=15)
+        self.power_three.grid(row=0, column=1, pady=5, padx=10)
+        tk.Label(input_frame, text="Вт").grid(row=0, column=2, sticky="w", pady=5)
+        
+        # Напряжение
+        tk.Label(input_frame, text="Напряжение U (В):", font=("Arial", 10)).grid(row=1, column=0, sticky="w", pady=5)
+        self.voltage_three = tk.Entry(input_frame, font=("Arial", 10), width=15)
+        self.voltage_three.insert(0, "380")  # Значение по умолчанию
+        self.voltage_three.grid(row=1, column=1, pady=5, padx=10)
+        tk.Label(input_frame, text="В").grid(row=1, column=2, sticky="w", pady=5)
+        
+        # Косинус фи
+        tk.Label(input_frame, text="cos(φ):", font=("Arial", 10)).grid(row=2, column=0, sticky="w", pady=5)
+        self.cos_phi_three = tk.Entry(input_frame, font=("Arial", 10), width=15)
+        self.cos_phi_three.insert(0, "0.8")  # Значение по умолчанию
+        self.cos_phi_three.grid(row=2, column=1, pady=5, padx=10)
+        
+        # Фрейм для кнопок
+        button_frame = tk.Frame(self.tab_three_phase)
+        button_frame.pack(pady=10)
+        
+        # Кнопка расчета
+        calc_btn = tk.Button(button_frame, text="Рассчитать ток",
+                           command=self.calculate_three_phase,
+                           font=("Arial", 12), bg="lightgreen", width=15)
+        calc_btn.grid(row=0, column=0, padx=10)
+        
+        # Кнопка сброса
+        reset_btn = tk.Button(button_frame, text="Сброс",
+                            command=self.reset_three_phase,
+                            font=("Arial", 12), bg="lightcoral", width=15)
+        reset_btn.grid(row=0, column=1, padx=10)
+        
+        # Поле результата
+        self.result_three = tk.Label(self.tab_three_phase, text="Результат: ",
+                                    font=("Arial", 12, "bold"), fg="green")
+        self.result_three.pack(pady=10)
+        
+        # Кнопка возврата
+        back_btn = tk.Button(self.tab_three_phase, text="Назад в меню",
+                           command=self.show_main,
+                           font=("Arial", 10))
+        back_btn.pack(side=tk.BOTTOM, pady=10)
+
+
+
+    def setup_cosinus_tab(self):
+        """Настройка вкладки для расчета общего косинуса"""
+        # Заголовок
+        title_label = tk.Label(self.tab_cosinus, 
+                              text="Расчет общего косинуса",
+                              font=("Arial", 16, "bold"))
+        title_label.pack(pady=10)
+        
+        # Формула
+        formula_label = tk.Label(self.tab_cosinus,
+                               text="Формула: cos(φ)общ = P∑ / √(P∑² + Q∑²)",
+                               font=("Arial", 12), fg="blue")
+        formula_label.pack(pady=5)
+              
+        # Поля ввода
+        input_frame = tk.Frame(self.tab_cosinus)
+        input_frame.pack(pady=20)
+        
+        # Создаем списки для хранения полей ввода
+        self.power_entries = []
+        self.cos_entries = []
+        
+        # Создаем 8 пар полей ввода в цикле
+        for i in range(8):
+            row = i
+            
+            # Мощность
+            tk.Label(input_frame, text=f"Мощность ЭП {i+1}, P(кВт):", 
+                    font=("Arial", 10)).grid(row=row, column=0, sticky="w", pady=5)
+            
+            power_entry = tk.Entry(input_frame, font=("Arial", 10), width=10)
+            power_entry.insert(0, '0')
+            power_entry.grid(row=row, column=1, pady=5, padx=10)
+            self.power_entries.append(power_entry)
+            
+            tk.Label(input_frame, text="кВт").grid(row=row, column=2, sticky="w", pady=5, padx=(0, 50))
+            
+            # Косинус фи
+            tk.Label(input_frame, text="cos(φ):", font=("Arial", 10)).grid(row=row, column=3, sticky="w", pady=5)
+            
+            cos_entry = tk.Entry(input_frame, font=("Arial", 10), width=10)
+            cos_entry.insert(0, "0")
+            cos_entry.grid(row=row, column=4, pady=5, padx=10)
+            self.cos_entries.append(cos_entry)
+
+        # Фрейм для кнопок
+        button_frame = tk.Frame(self.tab_cosinus)
+        button_frame.pack(pady=10)
+              
+        # Кнопка расчета
+        calc_btn = tk.Button(button_frame, text="Рассчитать общий косинус",
+                           command=self.calculate_cosinus,
+                           font=("Arial", 12), bg="lightgreen", width=20)
+        calc_btn.grid(row=0, column=0, padx=10)
+        
+        # Кнопка сброса
+        reset_btn = tk.Button(button_frame, text="Сброс",
+                            command=self.reset_cosinus,
+                            font=("Arial", 12), bg="lightcoral", width=20)
+        reset_btn.grid(row=0, column=1, padx=10)
+        
+        # Поле результата
+        self.result_cos = tk.Label(self.tab_cosinus, text="Результат: ",
+                                    font=("Arial", 12, "bold"), fg="green")
+        self.result_cos.pack(pady=10)
+        
+        # Кнопка возврата
+        back_btn = tk.Button(self.tab_cosinus, text="Назад в меню",
+                           command=self.show_main,
+                           font=("Arial", 10))
+        back_btn.pack(side=tk.BOTTOM, pady=10)
+    
+    def show_main(self):
+        """Показать главную вкладку"""
+        self.tab_control.select(0)
+    
+    def show_single_phase(self):
+        """Показать вкладку однофазного тока"""
+        self.tab_control.select(1)
+    
+    def show_three_phase(self):
+        """Показать вкладку трехфазного тока"""
+        self.tab_control.select(2)
+
+    def show_cosinus(self):
+        """Показать вкладку косинуса"""
+        self.tab_control.select(3)
+    
+    def calculate_single_phase(self):
+        """Расчет однофазного тока"""
+        try:
+            P = float(self.power_single.get())
+            U = float(self.voltage_single.get())
+            cos_phi = float(self.cos_phi_single.get())
+            
+            if P <= 0 or U <= 0 or cos_phi <= 0 or cos_phi > 1:
+                raise ValueError("Некорректные значения")
+            
+            I = P / (U * cos_phi)
+            self.result_single.config(text=f"Результат: I = {I:.2f} А")
+            
+        except ValueError as e:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")
+    
+    def calculate_three_phase(self):
+        """Расчет трехфазного тока"""
+        try:
+            P = float(self.power_three.get())
+            U = float(self.voltage_three.get())
+            cos_phi = float(self.cos_phi_three.get())
+            
+            if P <= 0 or U <= 0 or cos_phi <= 0 or cos_phi > 1:
+                raise ValueError("Некорректные значения")
+            
+            I = P / (1.732 * U * cos_phi)  # 1.732 = √3
+            self.result_three.config(text=f"Результат: I = {I:.2f} А")
+            
+        except ValueError as e:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")
+
+    def calculate_cosinus(self):
+        """Расчет общего косинуса"""
+        try:
+            total_power = 0
+            total_reactive_power = 0
+            
+            # Обрабатываем все электроприемники в цикле
+            for i in range(8):
+                power = float(self.power_entries[i].get())
+                cos_phi = float(self.cos_entries[i].get())
+                
+                if cos_phi < 0 or cos_phi > 1:
+                    raise ValueError(f"Некорректный cos(φ) для ЭП {i+1}")
+                
+                # Вычисляем реактивную мощность
+                if cos_phi > 0:  # избегаем деления на ноль
+                    phi_rad = math.acos(cos_phi)
+                    reactive_power = power * math.tan(phi_rad)
+                else:
+                    reactive_power = 0
+                
+                total_power += power
+                total_reactive_power += reactive_power
+            
+            # Вычисляем общий косинус
+            if total_power > 0:
+                total_tan = total_reactive_power / total_power
+                total_phi = math.atan(total_tan)
+                total_cos = math.cos(total_phi)
+                
+                self.result_cos.config(text=f"Результат: cos(φ)общ = {total_cos:.3f}\n"
+                                          f"Суммарная мощность: {total_power:.1f} кВт\n"
+                                          f"Суммарная реактивная мощность: {total_reactive_power:.1f} кВАр")
+            else:
+                self.result_cos.config(text="Результат: Введите мощности электроприемников")
+            
+        except ValueError as e:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения для всех полей")
+
+    def reset_single_phase(self):
+        """Сброс данных однофазного расчета"""
+        self.power_single.delete(0, tk.END)
+        self.voltage_single.delete(0, tk.END)
+        self.voltage_single.insert(0, "220")
+        self.cos_phi_single.delete(0, tk.END)
+        self.cos_phi_single.insert(0, "0.8")
+        self.result_single.config(text="Результат: ")
+        messagebox.showinfo("Сброс", "Данные однофазного расчета сброшены")
+
+    def reset_three_phase(self):
+        """Сброс данных трехфазного расчета"""
+        self.power_three.delete(0, tk.END)
+        self.voltage_three.delete(0, tk.END)
+        self.voltage_three.insert(0, "380")
+        self.cos_phi_three.delete(0, tk.END)
+        self.cos_phi_three.insert(0, "0.8")
+        self.result_three.config(text="Результат: ")
+        messagebox.showinfo("Сброс", "Данные трехфазного расчета сброшены")
+
+    def reset_cosinus(self):
+        """Сброс данных расчета общего косинуса"""
+        for entry in self.power_entries:
+            entry.delete(0, tk.END)
+            entry.insert(0, "0")
+        
+        for entry in self.cos_entries:
+            entry.delete(0, tk.END)
+            entry.insert(0, "0")
+        
+        self.result_cos.config(text="Результат: ")
+        messagebox.showinfo("Сброс", "Данные расчета общего косинуса сброшены")
+
+    def reset_all_data(self):
+        """Сброс всех данных во всех вкладках"""
+        self.reset_single_phase()
+        self.reset_three_phase()
+        self.reset_cosinus()
+        messagebox.showinfo("Сброс", "Все данные во всех вкладках сброшены")
+
+def main():
+    root = tk.Tk()
+    app = CurrentCalculator(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()

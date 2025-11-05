@@ -6,7 +6,7 @@ import math
 class CurrentCalculator:
     def __init__(self, root):
         self.root = root
-        self.root.title("Калькулятор тока")
+        self.root.title("Калькулятор инженера проектировщика")
         self.root.geometry("600x500")
 
         # Создание вкладок
@@ -28,12 +28,17 @@ class CurrentCalculator:
         self.tab_cosinus = ttk.Frame(self.tab_control)
         self.tab_control.add(self.tab_cosinus, text='Общий косинус')
 
+        # Удельная расчетная электрическая нагрузка электроприемников квартир жилых зданий, кВт/квартиру
+        self.tab_pp = ttk.Frame(self.tab_control)
+        self.tab_control.add(self.tab_pp, text='Нагрузка квартир')
+
         self.tab_control.pack(expand=1, fill='both')
 
         self.setup_main_tab()
         self.setup_single_phase_tab()
         self.setup_three_phase_tab()
         self.setup_cosinus_tab()
+        self.setup_pp_tab()
 
     def setup_main_tab(self):
         """Настройка главной вкладки с кнопками"""
@@ -58,6 +63,12 @@ class CurrentCalculator:
                             command=self.show_cosinus,
                             font=("Arial", 12), width=20, height=2)
         btn_cos.pack(pady=10)
+
+         # Кнопка для косинуса
+        btn_pp = tk.Button(self.tab_main, text="Расчет нагрузки квартир",
+                            command=self.show_cosinus,
+                            font=("Arial", 12), width=20, height=2)
+        btn_pp.pack(pady=10)
 
         # Кнопка сброса всех данных
         reset_btn = tk.Button(self.tab_main, text="Сброс всех данных",
@@ -269,6 +280,66 @@ class CurrentCalculator:
                              font=("Arial", 10))
         back_btn.pack(side=tk.BOTTOM, pady=10)
 
+    def setup_pp_tab(self):
+        """Настройка вкладки для расчета нагрузки квартир"""
+        # Заголовок
+        title_label = tk.Label(self.tab_pp,
+                               text="Расчет нагрузки картир",
+                               font=("Arial", 16, "bold"))
+        title_label.pack(pady=10)
+
+        # Формула
+        formula_label = tk.Label(self.tab_pp,
+                                 text="Формула: Pкв = Pкв.уд × n",
+                                 font=("Arial", 12), fg="blue")
+        formula_label.pack(pady=5)
+
+        # Поля ввода
+        input_frame = tk.Frame(self.tab_pp)
+        input_frame.pack(pady=20)
+
+        # Количество квартир с плитами на газе
+        tk.Label(input_frame, text="На природном газе, шт.", font=("Arial", 10)).grid(row=0, column=0, sticky="w", pady=5, padx=10)
+        self.pgaz = tk.Entry(input_frame, font=("Arial", 10), width=15)
+        self.pgaz.insert(0, "0")
+        self.pgaz.grid(row=1, column=0, pady=5, padx=10)
+        
+
+        # Количество квартир с электрическими плитами
+        tk.Label(input_frame, text="С электрическими плитами, шт", font=("Arial", 10)).grid(row=0, column=1, sticky="w", pady=5)
+        self.pel = tk.Entry(input_frame, font=("Arial", 10), width=15)
+        self.pel.insert(0, "0")
+        self.pel.grid(row=1, column=1, pady=5, padx=10)
+        
+
+       
+        # Фрейм для кнопок
+        button_frame = tk.Frame(self.tab_three_phase)
+        button_frame.pack(pady=10)
+
+        # Кнопка расчета
+        calc_btn = tk.Button(button_frame, text="Рассчитать мощность",
+                             command=self.calculate_pp,
+                             font=("Arial", 12), bg="lightgreen", width=15)
+        calc_btn.grid(row=0, column=0, padx=10)
+
+        # Кнопка сброса
+        reset_btn = tk.Button(button_frame, text="Сброс",
+                              command=self.reset_pp,
+                              font=("Arial", 12), bg="lightcoral", width=15)
+        reset_btn.grid(row=0, column=1, padx=10)
+
+        # Поле результата
+        self.result_three = tk.Label(self.tab_pp, text="Результат: ",
+                                     font=("Arial", 12, "bold"), fg="green")
+        self.result_three.pack(pady=10)
+
+        # Кнопка возврата
+        back_btn = tk.Button(self.tab_pp, text="Назад в меню",
+                             command=self.show_main,
+                             font=("Arial", 10))
+        back_btn.pack(side=tk.BOTTOM, pady=10)
+
     def show_main(self):
         """Показать главную вкладку"""
         self.tab_control.select(0)
@@ -284,6 +355,10 @@ class CurrentCalculator:
     def show_cosinus(self):
         """Показать вкладку косинуса"""
         self.tab_control.select(3)
+    
+    def show_pp(self):
+        """Показать вкладку расчета нагрузки квартир"""
+        self.tab_control.select(4)
 
     def calculate_single_phase(self):
         """Расчет однофазного тока"""
@@ -354,6 +429,22 @@ class CurrentCalculator:
         except ValueError:
             messagebox.showerror("Ошибка", "Проверьте правильность введенных данных")
 
+    def calculate_pp(self):
+        """Расчет нагрузок квартир"""
+        try:
+            P = float(self.power_three.get())
+            U = float(self.voltage_three.get())
+            cos_phi = float(self.cos_phi_three.get())
+
+            if P <= 0 or U <= 0 or cos_phi <= 0 or cos_phi > 1:
+                raise ValueError("Некорректные значения")
+
+            I = P / (1.732 * U * cos_phi)  # 1.732 = √3
+            self.result_three.config(text=f"Результат: I = {I:.2f} А")
+
+        except ValueError as e:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")
+
     def reset_single_phase(self):
         """Сброс данных однофазного расчета"""
         self.power_single.delete(0, tk.END)
@@ -379,6 +470,16 @@ class CurrentCalculator:
             entry.insert(0, "0")
 
         self.result_cos.config(text="Результат: ")
+
+    def reset_pp(self):
+        """Сброс данных расчета нагрузок квартир"""
+        self.power_three.delete(0, tk.END)
+        self.voltage_three.delete(0, tk.END)
+        self.voltage_three.insert(0, "380")
+        self.cos_phi_three.delete(0, tk.END)
+        self.cos_phi_three.insert(0, "0.8")
+        self.result_three.config(text="Результат: ")
+        
 
     def reset_all_data(self):
         """Сброс всех данных во всех вкладках"""

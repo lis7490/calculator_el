@@ -472,6 +472,7 @@ class CurrentCalculator:
         try:
             Ppg = 0
             Ppe = 0
+            Pkvg = 0
             ng = float(self.pgaz.get())
             ne = float(self.pel.get())
             
@@ -483,8 +484,41 @@ class CurrentCalculator:
             elif ng == 6 or ne == 6:
                 Ppg = six*ng
                 Ppe = sixe*ne
-            self.result_ppg.config(text=f"Результат на газе: Pp = {Ppg:.2f} кВт")
-            self.result_ppe.config(text=f"Результат на электричестве: Pp = {Ppe:.2f} кВт")
+            elif ng > 6 and ng < 9 or ne > 6 and ne < 9:
+                Ppg = ((nine-six)/(9-6)*(ng-6)+six)*ng
+                Ppe = ((ninee-sixe)/(9-6)*(ne-6)+sixe)*ne
+            elif ng == 9 or ne == 9:
+                Ppg = nine*ng
+                Ppe = ninee*ne
+            elif ng > 9 and ng < 12 or ne > 9 and ne < 12:
+                Ppg = ((twelw-nine)/(12-9)*(ng-9)+nine)*ng
+                Ppe = ((twelwe-ninee)/(12-9)*(ne-9)+ninee)*ne
+            elif ng == 12 or ne == 12:
+                Ppg = twelw*ng
+                Ppe = twelwe*ne
+            elif ng > 12 and ng < 15 or ne > 12 and ne < 15:
+                Ppg = ((fifteen-twelw)/(15-12)*(ng-12)+twelw)*ng
+                Ppe = ((fifteene-twelwe)/(15-12)*(ne-12)+twelwe)*ne
+            elif ng == 15 or ne == 15:
+                Ppg = fifteen*ng
+                Ppe = fifteene*ne
+            elif ng > 15 and ng < 18 or ne > 15 and ne < 18:
+                Ppg = ((eighteen-fifteen)/(18-15)*(ng-15)+fifteen)*ng
+                Ppe = ((eighteene-fifteene)/(18-15)*(ne-15)+fifteene)*ne
+            elif ng == 18 or ne == 18:
+                Ppg = eighteen*ng
+                Ppe = eighteene*ne
+            elif ng > 18 and ng < 24 or ne > 18 and ne < 24:
+                Ppg = ((twentyfour-eighteen)/(24-18)*(ng-18)+eighteen)*ng
+                Ppe = ((twentyfoure-eighteene)/(24-18)*(ne-18)+eighteene)*ne
+               
+
+            
+            
+            
+
+            self.result_ppg.config(text=f"Результат на газе: Pкв.уд = {Ppg/ng:.3f} кВт/кв., Pкв = {Ppg:.3f} кВт")
+            self.result_ppe.config(text=f"Результат на электричестве: Pкв.уд = {Ppe/ne:.3f} кВт/кв., Pкв = {Ppe:.3f} кВт")
             
 
         except ValueError as e:
@@ -518,12 +552,12 @@ class CurrentCalculator:
 
     def reset_pp(self):
         """Сброс данных расчета нагрузок квартир"""
-        self.power_three.delete(0, tk.END)
-        self.voltage_three.delete(0, tk.END)
-        self.voltage_three.insert(0, "380")
-        self.cos_phi_three.delete(0, tk.END)
-        self.cos_phi_three.insert(0, "0.8")
-        self.result_three.config(text="Результат: ")
+        self.pgaz.delete(0, tk.END)
+        self.pgaz.insert(0, "0")
+        self.pel.delete(0, tk.END)
+        self.pel.insert(0, "0")
+        self.result_ppg.config(text="Результат на газе: ")
+        self.result_ppe.config(text="Результат на электричестве: ")
         
 
     def reset_all_data(self):

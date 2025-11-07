@@ -66,7 +66,7 @@ class CurrentCalculator:
 
          # Кнопка для косинуса
         btn_pp = tk.Button(self.tab_main, text="Расчет нагрузки квартир",
-                            command=self.show_cosinus,
+                            command=self.show_pp,
                             font=("Arial", 12), width=20, height=2)
         btn_pp.pack(pady=10)
 
@@ -288,6 +288,12 @@ class CurrentCalculator:
                                font=("Arial", 16, "bold"))
         title_label.pack(pady=10)
 
+        # Ссылка на СП
+        sp_label = tk.Label(self.tab_pp,
+                               text="СП 256.1325800.2016, таблица 7.1",
+                               font=("Arial", 12), fg="green")
+        sp_label.pack(pady=5)
+
         # Формула
         formula_label = tk.Label(self.tab_pp,
                                  text="Формула: Pкв = Pкв.уд × n",
@@ -299,14 +305,14 @@ class CurrentCalculator:
         input_frame.pack(pady=20)
 
         # Количество квартир с плитами на газе
-        tk.Label(input_frame, text="На природном газе, шт.", font=("Arial", 10)).grid(row=0, column=0, sticky="w", pady=5, padx=10)
+        tk.Label(input_frame, text="Количество квартир с плитами на природном газе, шт.", wraplength=150, font=("Arial", 10)).grid(row=0, column=0, pady=5, padx=20)
         self.pgaz = tk.Entry(input_frame, font=("Arial", 10), width=15)
         self.pgaz.insert(0, "0")
         self.pgaz.grid(row=1, column=0, pady=5, padx=10)
         
 
         # Количество квартир с электрическими плитами
-        tk.Label(input_frame, text="С электрическими плитами, шт", font=("Arial", 10)).grid(row=0, column=1, sticky="w", pady=5)
+        tk.Label(input_frame, text="Количество квартир с электрическими плитами, шт", wraplength=150, font=("Arial", 10)).grid(row=0, column=1, pady=5, padx=20)
         self.pel = tk.Entry(input_frame, font=("Arial", 10), width=15)
         self.pel.insert(0, "0")
         self.pel.grid(row=1, column=1, pady=5, padx=10)
@@ -314,25 +320,29 @@ class CurrentCalculator:
 
        
         # Фрейм для кнопок
-        button_frame = tk.Frame(self.tab_three_phase)
+        button_frame = tk.Frame(self.tab_pp)
         button_frame.pack(pady=10)
 
         # Кнопка расчета
         calc_btn = tk.Button(button_frame, text="Рассчитать мощность",
                              command=self.calculate_pp,
-                             font=("Arial", 12), bg="lightgreen", width=15)
-        calc_btn.grid(row=0, column=0, padx=10)
+                             font=("Arial", 12), bg="lightgreen", width=25)
+        calc_btn.grid(row=0, column=0, pady=20)
 
         # Кнопка сброса
         reset_btn = tk.Button(button_frame, text="Сброс",
                               command=self.reset_pp,
                               font=("Arial", 12), bg="lightcoral", width=15)
-        reset_btn.grid(row=0, column=1, padx=10)
+        reset_btn.grid(row=1, column=0)
 
         # Поле результата
-        self.result_three = tk.Label(self.tab_pp, text="Результат: ",
+        self.result_ppg = tk.Label(self.tab_pp, text="Результат на газе: ",
                                      font=("Arial", 12, "bold"), fg="green")
-        self.result_three.pack(pady=10)
+        self.result_ppg.pack(pady=10)
+
+        self.result_ppe = tk.Label(self.tab_pp, text="Результат на электричестве: ",
+                                     font=("Arial", 12, "bold"), fg="green")
+        self.result_ppe.pack(pady=10)
 
         # Кнопка возврата
         back_btn = tk.Button(self.tab_pp, text="Назад в меню",
@@ -431,16 +441,51 @@ class CurrentCalculator:
 
     def calculate_pp(self):
         """Расчет нагрузок квартир"""
+       
+        one_five = 10
+        six = 2.8
+        sixe = 5.1
+        nine = 2.3
+        ninee = 3.8
+        twelw = 2
+        twelwe = 3.2
+        fifteen = 1.8
+        fifteene = 2.8
+        eighteen = 1.65
+        eighteene = 2.6
+        twentyfour = 1.4
+        twentyfoure = 2.2
+        forty = 1.2
+        fortye = 1.95
+        sixty = 1.05
+        sixtye = 1.7
+        onehundred = 0.85
+        onehundrede = 1.5
+        twohundred = 0.77
+        twohundrede = 1.36
+        fourhundred = 0.71
+        fourhundrede = 1.27
+        sixhundred = 0.69
+        sixhundrede = 1.23
+        onethousand = 0.67
+        onethousande = 1.19
         try:
-            P = float(self.power_three.get())
-            U = float(self.voltage_three.get())
-            cos_phi = float(self.cos_phi_three.get())
-
-            if P <= 0 or U <= 0 or cos_phi <= 0 or cos_phi > 1:
+            Ppg = 0
+            Ppe = 0
+            ng = float(self.pgaz.get())
+            ne = float(self.pel.get())
+            
+            if ng < 0 or ng > 1000 or ne < 0 or ne > 1000:
                 raise ValueError("Некорректные значения")
-
-            I = P / (1.732 * U * cos_phi)  # 1.732 = √3
-            self.result_three.config(text=f"Результат: I = {I:.2f} А")
+            if ng in range(1, 6) or ne in range(1, 6):
+                Ppg = one_five*ng
+                Ppe = one_five*ne
+            elif ng == 6 or ne == 6:
+                Ppg = six*ng
+                Ppe = sixe*ne
+            self.result_ppg.config(text=f"Результат на газе: Pp = {Ppg:.2f} кВт")
+            self.result_ppe.config(text=f"Результат на электричестве: Pp = {Ppe:.2f} кВт")
+            
 
         except ValueError as e:
             messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")

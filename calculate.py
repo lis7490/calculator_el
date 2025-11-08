@@ -70,12 +70,6 @@ class CurrentCalculator:
                             font=("Arial", 12), width=20, height=2)
         btn_pp.pack(pady=10)
 
-        # Кнопка сброса всех данных
-        reset_btn = tk.Button(self.tab_main, text="Сброс всех данных",
-                              command=self.reset_all_data,
-                              font=("Arial", 10), bg="lightcoral")
-        reset_btn.pack(pady=20)
-
         # Информация о программе
         info_label = tk.Label(self.tab_main,
                               text="Помощь проектировщику электрику\n"
@@ -511,14 +505,54 @@ class CurrentCalculator:
             elif ng > 18 and ng < 24 or ne > 18 and ne < 24:
                 Ppg = ((twentyfour-eighteen)/(24-18)*(ng-18)+eighteen)*ng
                 Ppe = ((twentyfoure-eighteene)/(24-18)*(ne-18)+eighteene)*ne
-               
+            elif ng == 24 or ne == 24:
+                Ppg = twentyfour*ng
+                Ppe = twentyfoure*ne
+            elif ng > 24 and ng < 40 or ne > 24 and ne < 40:
+                Ppg = ((forty-twentyfour)/(40-24)*(ng-24)+twentyfour)*ng
+                Ppe = ((fortye-twentyfoure)/(40-24)*(ne-24)+twentyfoure)*ne
+            elif ng == 40 or ne == 40:
+                Ppg = forty*ng
+                Ppe = fortye*ne
+            elif ng > 40 and ng < 60 or ne > 40 and ne < 60:
+                Ppg = ((sixty-forty)/(60-40)*(ng-40)+forty)*ng
+                Ppe = ((sixtye-fortye)/(60-40)*(ne-40)+fortye)*ne
+            elif ng == 60 or ne == 60:
+                Ppg = sixty*ng
+                Ppe = sixtye*ne
+            elif ng > 60 and ng < 100 or ne > 60 and ne < 100:
+                Ppg = ((onehundred-sixty)/(100-60)*(ng-60)+sixty)*ng
+                Ppe = ((onehundrede-sixtye)/(100-60)*(ne-60)+sixtye)*ne
+            elif ng == 100 or ne == 100:
+                Ppg = onehundred*ng
+                Ppe = onehundrede*ne
+            elif ng > 100 and ng < 200 or ne > 100 and ne < 200:
+                Ppg = ((twohundred-onehundred)/(200-100)*(ng-100)+onehundred)*ng
+                Ppe = ((twohundrede-onehundrede)/(200-100)*(ne-100)+onehundrede)*ne
+            elif ng == 200 or ne == 200:
+                Ppg = twohundred*ng
+                Ppe = twohundrede*ne
+            elif ng > 200 and ng < 400 or ne > 200 and ne < 400:
+                Ppg = ((fourhundred-twohundred)/(400-200)*(ng-200)+twohundred)*ng
+                Ppe = ((fourhundrede-twohundrede)/(400-200)*(ne-200)+twohundrede)*ne
+            elif ng == 400 or ne == 400:
+                Ppg = fourhundred*ng
+                Ppe = fourhundrede*ne
+            elif ng > 400 and ng < 600 or ne > 400 and ne < 600:
+                Ppg = ((sixhundred-fourhundred)/(600-400)*(ng-400)+fourhundred)*ng
+                Ppe = ((sixhundrede-fourhundrede)/(600-400)*(ne-400)+fourhundrede)*ne
+            elif ng == 600 or ne == 600:
+                Ppg = sixhundred*ng
+                Ppe = sixhundrede*ne
+            elif ng > 600 and ng < 1000 or ne > 600 and ne < 1000:
+                Ppg = ((onethousand-sixhundred)/(1000-600)*(ng-600)+sixhundred)*ng
+                Ppe = ((onethousande-sixhundrede)/(1000-600)*(ne-600)+sixhundrede)*ne
+            elif ng == 1000 or ne == 1000:
+                Ppg = onethousand*ng
+                Ppe = onethousande*ne
 
-            
-            
-            
-
-            self.result_ppg.config(text=f"Результат на газе: Pкв.уд = {Ppg/ng:.3f} кВт/кв., Pкв = {Ppg:.3f} кВт")
-            self.result_ppe.config(text=f"Результат на электричестве: Pкв.уд = {Ppe/ne:.3f} кВт/кв., Pкв = {Ppe:.3f} кВт")
+            self.result_ppg.config(text=f"Результат на газе: Pкв.уд = {Ppg/ng:.3f} кВт/кв., Pкв = {Ppg:.2f} кВт")
+            self.result_ppe.config(text=f"Результат на электричестве: Pкв.уд = {Ppe/ne:.3f} кВт/кв., Pкв = {Ppe:.2f} кВт")
             
 
         except ValueError as e:
@@ -559,13 +593,6 @@ class CurrentCalculator:
         self.result_ppg.config(text="Результат на газе: ")
         self.result_ppe.config(text="Результат на электричестве: ")
         
-
-    def reset_all_data(self):
-        """Сброс всех данных во всех вкладках"""
-        self.reset_single_phase()
-        self.reset_three_phase()
-        self.reset_cosinus()
-        messagebox.showinfo("Сброс", "Все данные во всех вкладках сброшены")
 
 
 def main():

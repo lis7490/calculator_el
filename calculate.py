@@ -9,11 +9,8 @@ class CurrentCalculator:
         self.root.title("Калькулятор инженера проектировщика")
         self.root.geometry("700x550")
 
-        self.setup_custom_style()
-
-
         # Создание вкладок
-        self.tab_control = ttk.Notebook(root, style="TNotebook")
+        self.tab_control = ttk.Notebook(root)
 
         # Вкладка главного меню
         self.tab_main = ttk.Frame(self.tab_control)
@@ -47,10 +44,6 @@ class CurrentCalculator:
         self.setup_cosinus_tab()
         self.setup_ppg_tab()
         self.setup_ppe_tab()
-
-    def setup_custom_style(self):
-        style = ttk.Style()
-        style.configure("TNotebook", tabposition='n')
 
     def setup_main_tab(self):
         """Настройка главной вкладки с кнопками"""

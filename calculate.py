@@ -84,7 +84,7 @@ class CurrentCalculator:
         # Информация о программе
         info_label = tk.Label(self.tab_main,
                               text="Помощь проектировщику электрику\n"
-                                   "Ступников Дмитрий",
+                                   "Разработчик: Ступников Дмитрий",
                               font=("Arial", 10), fg="black")
         info_label.pack(side=tk.BOTTOM, pady=10)
 
@@ -332,7 +332,7 @@ class CurrentCalculator:
         reset_btn.grid(row=1, column=0)
 
         # Поле результата
-        self.result_ppg = tk.Label(self.tab_ppg, text="Результат на газе: ",
+        self.result_ppg = tk.Label(self.tab_ppg, text="Результат:",
                                    font=("Arial", 12, "bold"), fg="green")
         self.result_ppg.pack(pady=10)
 
@@ -390,7 +390,7 @@ class CurrentCalculator:
         reset_btn.grid(row=1, column=0)
 
         # Поле результата
-        self.result_ppe = tk.Label(self.tab_ppe, text="Результат на электричестве: ",
+        self.result_ppe = tk.Label(self.tab_ppe, text="Результат:",
                                    font=("Arial", 12, "bold"), fg="green")
         self.result_ppe.pack(pady=10)
 
@@ -650,7 +650,7 @@ class CurrentCalculator:
             elif ne > 600 and ne < 1000:
                 Ppe = ((onethousande - sixhundrede) / (1000 - 600) * (ne - 600) + sixhundrede) * ne
             elif ne == 1000:
-                Ppg = onethousande * ne
+                Ppe = onethousande * ne
 
             self.result_ppe.config(text=f"Результат:\n\nPкв.уд = {Ppe / ne:.3f} кВт/кв.\n\nPкв = {Ppe:.2f} кВт")
 
@@ -687,13 +687,13 @@ class CurrentCalculator:
         """Сброс данных расчета нагрузок квартир"""
         self.pgaz.delete(0, tk.END)
         self.pgaz.insert(0, "0")
-        self.result_ppg.config(text="Результат на газе: ")
+        self.result_ppg.config(text="Результат: ")
 
     def reset_ppe(self):
         """Сброс данных расчета нагрузок квартир"""
         self.pel.delete(0, tk.END)
         self.pel.insert(0, "0")
-        self.result_ppe.config(text="Результат на газе: ")
+        self.result_ppe.config(text="Результат: ")
 
         
 

@@ -7,10 +7,13 @@ class CurrentCalculator:
     def __init__(self, root):
         self.root = root
         self.root.title("Калькулятор инженера проектировщика")
-        self.root.geometry("700x500")
+        self.root.geometry("700x550")
+
+        self.setup_custom_style()
+
 
         # Создание вкладок
-        self.tab_control = ttk.Notebook(root)
+        self.tab_control = ttk.Notebook(root, style="TNotebook")
 
         # Вкладка главного меню
         self.tab_main = ttk.Frame(self.tab_control)
@@ -32,6 +35,10 @@ class CurrentCalculator:
         self.tab_ppg = ttk.Frame(self.tab_control)
         self.tab_control.add(self.tab_ppg, text='Нагрузка квартир (ГАЗ)')
 
+        # Удельная расчетная электрическая нагрузка электроприемников квартир жилых зданий, кВт/квартиру на ЭЛЕКТРИЧЕСТВЕ
+        self.tab_ppe = ttk.Frame(self.tab_control)
+        self.tab_control.add(self.tab_ppe, text='Нагрузка квартир (ЭЛ)')
+
         self.tab_control.pack(expand=1, fill='both')
 
         self.setup_main_tab()
@@ -39,6 +46,11 @@ class CurrentCalculator:
         self.setup_three_phase_tab()
         self.setup_cosinus_tab()
         self.setup_ppg_tab()
+        self.setup_ppe_tab()
+
+    def setup_custom_style(self):
+        style = ttk.Style()
+        style.configure("TNotebook", tabposition='n')
 
     def setup_main_tab(self):
         """Настройка главной вкладки с кнопками"""
@@ -284,7 +296,7 @@ class CurrentCalculator:
         """Настройка вкладки для расчета нагрузки квартир на ГАЗЕ"""
         # Заголовок
         title_label = tk.Label(self.tab_ppg,
-                               text="Расчет нагрузки квартир на ГАЗЕ",
+                               text="Расчет нагрузки квартир с плитами на ГАЗЕ",
                                font=("Arial", 16, "bold"))
         title_label.pack(pady=10)
 
@@ -302,7 +314,7 @@ class CurrentCalculator:
 
         # Поля ввода
         input_frame = tk.Frame(self.tab_ppg)
-        input_frame.pack(pady=20)
+        input_frame.pack(pady=10)
 
         # Количество квартир с плитами на газе
         tk.Label(input_frame, text="Количество квартир с плитами на природном газе, шт.", wraplength=150, font=("Arial", 10)).grid(row=0, column=0, pady=5, padx=20)
@@ -333,6 +345,64 @@ class CurrentCalculator:
 
         # Кнопка возврата
         back_btn = tk.Button(self.tab_ppg, text="Назад в меню",
+                             command=self.show_main,
+                             font=("Arial", 10))
+        back_btn.pack(side=tk.BOTTOM, pady=10)
+
+    def setup_ppe_tab(self):
+        """Настройка вкладки для расчета нагрузки квартир на Электричестве"""
+        # Заголовок
+        title_label = tk.Label(self.tab_ppe,
+                               text="Расчет нагрузки квартир с плитами на ЭЛЕКТРИЧЕСТВЕ",
+                               font=("Arial", 16, "bold"))
+        title_label.pack(pady=10)
+
+        # Ссылка на СП
+        sp_label = tk.Label(self.tab_ppe,
+                            text="СП 256.1325800.2016, таблица 7.1",
+                            font=("Arial", 12), fg="green")
+        sp_label.pack(pady=5)
+
+        # Формула
+        formula_label = tk.Label(self.tab_ppe,
+                                 text="Формула: Pкв = Pкв.уд × n",
+                                 font=("Arial", 12), fg="blue")
+        formula_label.pack(pady=5)
+
+        # Поля ввода
+        input_frame = tk.Frame(self.tab_ppe)
+        input_frame.pack(pady=10)
+
+        # Количество квартир с плитами на электричестве
+        tk.Label(input_frame, text="Количество квартир с электрическими плитами, шт.", wraplength=150,
+                 font=("Arial", 10)).grid(row=0, column=0, pady=5, padx=20)
+        self.pel = tk.Entry(input_frame, font=("Arial", 10), width=15)
+        self.pel.insert(0, "0")
+        self.pel.grid(row=1, column=0, pady=5, padx=10)
+
+        # Фрейм для кнопок
+        button_frame = tk.Frame(self.tab_ppe)
+        button_frame.pack(pady=10)
+
+        # Кнопка расчета
+        calc_btn = tk.Button(button_frame, text="Рассчитать мощность",
+                             command=self.calculate_ppe,
+                             font=("Arial", 12), bg="lightgreen", width=25)
+        calc_btn.grid(row=0, column=0, pady=20)
+
+        # Кнопка сброса
+        reset_btn = tk.Button(button_frame, text="Сброс",
+                              command=self.reset_ppe,
+                              font=("Arial", 12), bg="lightcoral", width=15)
+        reset_btn.grid(row=1, column=0)
+
+        # Поле результата
+        self.result_ppe = tk.Label(self.tab_ppe, text="Результат на электричестве: ",
+                                   font=("Arial", 12, "bold"), fg="green")
+        self.result_ppe.pack(pady=10)
+
+        # Кнопка возврата
+        back_btn = tk.Button(self.tab_ppe, text="Назад в меню",
                              command=self.show_main,
                              font=("Arial", 10))
         back_btn.pack(side=tk.BOTTOM, pady=10)
@@ -435,31 +505,18 @@ class CurrentCalculator:
        
         one_five = 10
         six = 2.8
-        sixe = 5.1
         nine = 2.3
-        ninee = 3.8
         twelw = 2
-        twelwe = 3.2
         fifteen = 1.8
-        fifteene = 2.8
         eighteen = 1.65
-        eighteene = 2.6
         twentyfour = 1.4
-        twentyfoure = 2.2
         forty = 1.2
-        fortye = 1.95
         sixty = 1.05
-        sixtye = 1.7
         onehundred = 0.85
-        onehundrede = 1.5
         twohundred = 0.77
-        twohundrede = 1.36
         fourhundred = 0.71
-        fourhundrede = 1.27
         sixhundred = 0.69
-        sixhundrede = 1.23
         onethousand = 0.67
-        onethousande = 1.19
         try:
             Ppg = 0
             ng = float(self.pgaz.get())
@@ -469,88 +526,140 @@ class CurrentCalculator:
 
             if ng in range(1, 6):
                 Ppg = one_five*ng
-
             elif ng == 6:
                 Ppg = six*ng
-
             elif ng > 6 and ng < 9:
                 Ppg = ((nine-six)/(9-6)*(ng-6)+six)*ng
-
             elif ng == 9:
                 Ppg = nine*ng
-
             elif ng > 9 and ng < 12:
                 Ppg = ((twelw-nine)/(12-9)*(ng-9)+nine)*ng
-
             elif ng == 12:
                 Ppg = twelw*ng
-
             elif ng > 12 and ng < 15:
                 Ppg = ((fifteen-twelw)/(15-12)*(ng-12)+twelw)*ng
-
             elif ng == 15:
                 Ppg = fifteen*ng
-
             elif ng > 15 and ng < 18:
                 Ppg = ((eighteen-fifteen)/(18-15)*(ng-15)+fifteen)*ng
-
             elif ng == 18:
                 Ppg = eighteen*ng
-
             elif ng > 18 and ng < 24:
                 Ppg = ((twentyfour-eighteen)/(24-18)*(ng-18)+eighteen)*ng
-
             elif ng == 24:
                 Ppg = twentyfour*ng
-
             elif ng > 24 and ng < 40:
                 Ppg = ((forty-twentyfour)/(40-24)*(ng-24)+twentyfour)*ng
-
             elif ng == 40 :
                 Ppg = forty*ng
-
             elif ng > 40 and ng < 60:
                 Ppg = ((sixty-forty)/(60-40)*(ng-40)+forty)*ng
-
             elif ng == 60:
                 Ppg = sixty*ng
-
             elif ng > 60 and ng < 100:
                 Ppg = ((onehundred-sixty)/(100-60)*(ng-60)+sixty)*ng
-
             elif ng == 100:
                 Ppg = onehundred*ng
-
             elif ng > 100 and ng < 200:
                 Ppg = ((twohundred-onehundred)/(200-100)*(ng-100)+onehundred)*ng
-
             elif ng == 200:
                 Ppg = twohundred*ng
-
             elif ng > 200 and ng < 400:
                 Ppg = ((fourhundred-twohundred)/(400-200)*(ng-200)+twohundred)*ng
-
             elif ng == 400:
                 Ppg = fourhundred*ng
-
             elif ng > 400 and ng < 600:
                 Ppg = ((sixhundred-fourhundred)/(600-400)*(ng-400)+fourhundred)*ng
-
             elif ng == 600:
                 Ppg = sixhundred*ng
-
             elif ng > 600 and ng < 1000:
                 Ppg = ((onethousand-sixhundred)/(1000-600)*(ng-600)+sixhundred)*ng
-
             elif ng == 1000:
                 Ppg = onethousand*ng
 
+            self.result_ppg.config(text=f"Результат:\n\nPкв.уд = {Ppg / ng:.3f} кВт/кв.\n\nPкв = {Ppg:.2f} кВт")
 
-            self.result_ppg.config(text=f"Результат на газе: Pкв.уд = {Ppg / ng:.3f} кВт/кв., Pкв = {Ppg:.2f} кВт")
+        except ValueError as e:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")
 
+    def calculate_ppe(self):
+        """Расчет нагрузок квартир на ""ЭЛЕКТРИЧЕСТВЕ"""""
 
+        one_five = 10
+        sixe = 5.1
+        ninee = 3.8
+        twelwe = 3.2
+        fifteene = 2.8
+        eighteene = 2.6
+        twentyfoure = 2.2
+        fortye = 1.95
+        sixtye = 1.7
+        onehundrede = 1.5
+        twohundrede = 1.36
+        fourhundrede = 1.27
+        sixhundrede = 1.23
+        onethousande = 1.19
+        try:
+            Ppe = 0
+            ne = float(self.pel.get())
 
-            
+            if ne < 0 or ne > 1000:
+                raise ValueError("Некорректные значения")
+
+            if ne in range(1, 6):
+                Ppe = one_five * ne
+            elif ne == 6:
+                Ppe = sixe * ne
+            elif ne > 6 and ne < 9:
+                Ppe = ((ninee - sixe) / (9 - 6) * (ne - 6) + sixe) * ne
+            elif ne == 9:
+                Ppe = ninee * ne
+            elif ne > 9 and ne < 12:
+                Ppe = ((twelwe - ninee) / (12 - 9) * (ne - 9) + ninee) * ne
+            elif ne == 12:
+                Ppe = twelwe * ne
+            elif ne > 12 and ne < 15:
+                Ppe = ((fifteene - twelwe) / (15 - 12) * (ne - 12) + twelwe) * ne
+            elif ne == 15:
+                Ppe = fifteene * ne
+            elif ne > 15 and ne < 18:
+                Ppe = ((eighteene - fifteene) / (18 - 15) * (ne - 15) + fifteene) * ne
+            elif ne == 18:
+                Ppe = eighteene * ne
+            elif ne > 18 and ne < 24:
+                Ppe = ((twentyfoure - eighteene) / (24 - 18) * (ne - 18) + eighteene) * ne
+            elif ne == 24:
+                Ppe = twentyfoure * ne
+            elif ne > 24 and ne < 40:
+                Ppe = ((fortye - twentyfoure) / (40 - 24) * (ne - 24) + twentyfoure) * ne
+            elif ne == 40:
+                Ppe = fortye * ne
+            elif ne > 40 and ne < 60:
+                Ppe = ((sixtye - fortye) / (60 - 40) * (ne - 40) + fortye) * ne
+            elif ne == 60:
+                Ppe = sixtye * ne
+            elif ne > 60 and ne < 100:
+                Ppe = ((onehundrede - sixtye) / (100 - 60) * (ne - 60) + sixtye) * ne
+            elif ne == 100:
+                Ppe = onehundrede * ne
+            elif ne > 100 and ne < 200:
+                Ppe = ((twohundrede - onehundrede) / (200 - 100) * (ne - 100) + onehundrede) * ne
+            elif ne == 200:
+                Ppe = twohundrede * ne
+            elif ne > 200 and ne < 400:
+                Ppe = ((fourhundrede - twohundrede) / (400 - 200) * (ne - 200) + twohundrede) * ne
+            elif ne == 400:
+                Ppe = fourhundrede * ne
+            elif ne > 400 and ne < 600:
+                Ppe = ((sixhundrede - fourhundrede) / (600 - 400) * (ne - 400) + fourhundrede) * ne
+            elif ne == 600:
+                Ppe = sixhundrede * ne
+            elif ne > 600 and ne < 1000:
+                Ppe = ((onethousande - sixhundrede) / (1000 - 600) * (ne - 600) + sixhundrede) * ne
+            elif ne == 1000:
+                Ppg = onethousande * ne
+
+            self.result_ppe.config(text=f"Результат:\n\nPкв.уд = {Ppe / ne:.3f} кВт/кв.\n\nPкв = {Ppe:.2f} кВт")
 
         except ValueError as e:
             messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")
@@ -586,6 +695,12 @@ class CurrentCalculator:
         self.pgaz.delete(0, tk.END)
         self.pgaz.insert(0, "0")
         self.result_ppg.config(text="Результат на газе: ")
+
+    def reset_ppe(self):
+        """Сброс данных расчета нагрузок квартир"""
+        self.pel.delete(0, tk.END)
+        self.pel.insert(0, "0")
+        self.result_ppe.config(text="Результат на газе: ")
 
         
 

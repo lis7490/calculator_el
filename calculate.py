@@ -496,7 +496,7 @@ class CurrentCalculator:
     def calculate_ppg(self):
         """Расчет нагрузок квартир на ГАЗЕ"""
        
-        one_five = 10
+        one_five = 4.5
         six = 2.8
         nine = 2.3
         twelw = 2

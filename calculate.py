@@ -6,7 +6,7 @@ import math
 class CurrentCalculator:
     def __init__(self, root):
         self.root = root
-        self.root.title("Калькулятор инженера проектировщика.v2")
+        self.root.title("Калькулятор инженера проектировщика.v2.1")
         self.root.geometry("800x600")
 
         # Создание вкладок
@@ -323,7 +323,6 @@ class CurrentCalculator:
         # Количество квартир с плитами на газе
         tk.Label(input_frame, text="Количество квартир с плитами на природном газе, шт.", wraplength=150, font=("Arial", 10)).grid(row=0, column=0, pady=5, padx=20)
         self.pgaz = tk.Entry(input_frame, font=("Arial", 10), width=15)
-        self.pgaz.insert(0, "0")
         self.pgaz.grid(row=1, column=0, pady=5, padx=10)
         
         # Фрейм для кнопок
@@ -381,7 +380,6 @@ class CurrentCalculator:
         tk.Label(input_frame, text="Количество квартир с электрическими плитами, шт.", wraplength=150,
                  font=("Arial", 10)).grid(row=0, column=0, pady=5, padx=20)
         self.pel = tk.Entry(input_frame, font=("Arial", 10), width=15)
-        self.pel.insert(0, "0")
         self.pel.grid(row=1, column=0, pady=5, padx=10)
 
         # Фрейм для кнопок
@@ -439,14 +437,12 @@ class CurrentCalculator:
         tk.Label(input_frame, text="Заявленная мощность, кВт", wraplength=200,
                  font=("Arial", 10)).grid(row=0, column=0, pady=5, padx=20)
         self.pu = tk.Entry(input_frame, font=("Arial", 10), width=15)
-        self.pu.insert(0, "0")
         self.pu.grid(row=1, column=0, pady=5, padx=10)
 
         # Количество квартир, шт.
         tk.Label(input_frame, text="Количество квартир повышенной комфортности, шт.", wraplength=200,
                  font=("Arial", 10)).grid(row=2, column=0, pady=5, padx=20)
         self.pn = tk.Entry(input_frame, font=("Arial", 10), width=15)
-        self.pn.insert(0, "0")
         self.pn.grid(row=3, column=0, pady=5, padx=5)
 
 
@@ -816,9 +812,11 @@ class CurrentCalculator:
                 Ppk = ((sixhundredk - fourhundredk) / (600 - 400) * (nk - 400) + fourhundredk) * nk * Ppu
             else:
                 Ppk = Ppu * nk * sixhundredk
-
-            self.result_ppp.config(text=f"Kc = {Ppu/nu:.3f}\n\nKo = {Ppk/(nk*Ppu):.3f}\n\nPp.кв = {Ppk:.2f} кВт")
-
+            if nu > 0 and nk > 0:
+                self.result_ppp.config(text=f"Kc = {Ppu/nu:.3f}\n\nKo = {Ppk/(nk*Ppu):.3f}\n\nPp.кв = {Ppk:.2f} кВт")
+            else:
+                self.result_ppp.config(
+                    text=f"Введите исходные данные")
         except ValueError as e:
             messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")
 
@@ -851,21 +849,17 @@ class CurrentCalculator:
     def reset_ppg(self):
         """Сброс данных расчета нагрузок квартир"""
         self.pgaz.delete(0, tk.END)
-        self.pgaz.insert(0, "0")
         self.result_ppg.config(text="Результат: ")
 
     def reset_ppe(self):
         """Сброс данных расчета нагрузок квартир"""
         self.pel.delete(0, tk.END)
-        self.pel.insert(0, "0")
         self.result_ppe.config(text="Результат: ")
 
     def reset_ppp(self):
         """Сброс данных расчета нагрузок квартир ПК"""
         self.pu.delete(0, tk.END)
-        self.pu.insert(0, "0")
         self.pn.delete(0, tk.END)
-        self.pn.insert(0, "0")
         self.result_ppp.config(text="Результат: ")
 
 

@@ -6,8 +6,8 @@ import math
 class CurrentCalculator:
     def __init__(self, root):
         self.root = root
-        self.root.title("Калькулятор инженера проектировщика")
-        self.root.geometry("700x550")
+        self.root.title("Калькулятор инженера проектировщика.v2")
+        self.root.geometry("800x600")
 
         # Создание вкладок
         self.tab_control = ttk.Notebook(root)
@@ -36,6 +36,10 @@ class CurrentCalculator:
         self.tab_ppe = ttk.Frame(self.tab_control)
         self.tab_control.add(self.tab_ppe, text='Нагрузка квартир (ЭЛ)')
 
+        # Удельная расчетная электрическая нагрузка электроприемников квартир жилых зданий, кВт/квартиру ПОВЫШЕННОЙ КОМФОРТНОСТИ
+        self.tab_ppp = ttk.Frame(self.tab_control)
+        self.tab_control.add(self.tab_ppp, text='Нагрузка квартир (ПК)')
+
         self.tab_control.pack(expand=1, fill='both')
 
         self.setup_main_tab()
@@ -44,6 +48,7 @@ class CurrentCalculator:
         self.setup_cosinus_tab()
         self.setup_ppg_tab()
         self.setup_ppe_tab()
+        self.setup_ppp_tab()
 
     def setup_main_tab(self):
         """Настройка главной вкладки с кнопками"""
@@ -80,6 +85,12 @@ class CurrentCalculator:
                             command=self.show_ppg,
                             font=("Arial", 12), width=25, height=2)
         btn_ppe.pack(pady=10)
+
+        # Кнопка для Рр повышенной комфортности
+        btn_ppp = tk.Button(self.tab_main, text="Расчет нагрузки\n квартир (КОМФОРТ)",
+                            command=self.show_ppp,
+                            font=("Arial", 12), width=25, height=2)
+        btn_ppp.pack(pady=10)
 
         # Информация о программе
         info_label = tk.Label(self.tab_main,
@@ -400,6 +411,72 @@ class CurrentCalculator:
                              font=("Arial", 10))
         back_btn.pack(side=tk.BOTTOM, pady=10)
 
+    def setup_ppp_tab(self):
+        """Настройка вкладки для расчета нагрузки квартир ПОВЫШЕННОЙ КОМФОРТНОСТИ"""
+        # Заголовок
+        title_label = tk.Label(self.tab_ppp,
+                               text="Расчет нагрузки квартир ПОВЫШЕННОЙ КОМФОРТНОСТИ",
+                               font=("Arial", 16, "bold"))
+        title_label.pack(pady=10)
+
+        # Ссылка на СП
+        sp_label = tk.Label(self.tab_ppp,
+                            text="СП 256.1325800.2016, таблица 7.2, 7.3",
+                            font=("Arial", 12), fg="green")
+        sp_label.pack(pady=5)
+
+        # Формула
+        formula_label = tk.Label(self.tab_ppp,
+                                 text="Формула: Pp.кв = Pкв × n × Ko",
+                                 font=("Arial", 12), fg="blue")
+        formula_label.pack(pady=5)
+
+        # Поля ввода
+        input_frame = tk.Frame(self.tab_ppp)
+        input_frame.pack(pady=10)
+
+        # Заявленная мощность, кВт
+        tk.Label(input_frame, text="Заявленная мощность, кВт", wraplength=200,
+                 font=("Arial", 10)).grid(row=0, column=0, pady=5, padx=20)
+        self.pu = tk.Entry(input_frame, font=("Arial", 10), width=15)
+        self.pu.insert(0, "0")
+        self.pu.grid(row=1, column=0, pady=5, padx=10)
+
+        # Количество квартир, шт.
+        tk.Label(input_frame, text="Количество квартир повышенной комфортности, шт.", wraplength=200,
+                 font=("Arial", 10)).grid(row=2, column=0, pady=5, padx=20)
+        self.pn = tk.Entry(input_frame, font=("Arial", 10), width=15)
+        self.pn.insert(0, "0")
+        self.pn.grid(row=3, column=0, pady=5, padx=5)
+
+
+        # Фрейм для кнопок
+        button_frame = tk.Frame(self.tab_ppp)
+        button_frame.pack(pady=5)
+
+        # Кнопка расчета
+        calc_btn = tk.Button(button_frame, text="Рассчитать мощность",
+                             command=self.calculate_ppp,
+                             font=("Arial", 12), bg="lightgreen", width=25)
+        calc_btn.grid(row=0, column=0, pady=20)
+
+        # Кнопка сброса
+        reset_btn = tk.Button(button_frame, text="Сброс",
+                              command=self.reset_ppp,
+                              font=("Arial", 12), bg="lightcoral", width=15)
+        reset_btn.grid(row=1, column=0)
+
+        # Поле результата
+        self.result_ppp = tk.Label(self.tab_ppp, text="Результат:",
+                                   font=("Arial", 12, "bold"), fg="green")
+        self.result_ppp.pack(pady=10)
+
+        # Кнопка возврата
+        back_btn = tk.Button(self.tab_ppp, text="Назад в меню",
+                             command=self.show_main,
+                             font=("Arial", 10))
+        back_btn.pack(side=tk.BOTTOM, pady=10)
+
     def show_main(self):
         """Показать главную вкладку"""
         self.tab_control.select(0)
@@ -423,6 +500,10 @@ class CurrentCalculator:
     def show_ppe(self):
         """Показать вкладку расчета нагрузки квартир на ЭЛЕКТРИЧЕСТВЕ"""
         self.tab_control.select(5)
+
+    def show_ppp(self):
+        """Показать вкладку расчета нагрузки квартир ПП"""
+        self.tab_control.select(6)
 
     def calculate_single_phase(self):
         """Расчет однофазного тока"""
@@ -657,6 +738,90 @@ class CurrentCalculator:
         except ValueError as e:
             messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")
 
+    def calculate_ppp(self):
+        """Расчет нагрузок квартир ПК"""
+
+        one_14 = 0.8
+        twentyp = 0.65
+        thirtyp = 0.6
+        fortyp = 0.55
+        fiftyp = 0.5
+        sixtyp = 0.48
+        seventyp = 0.45
+
+        one_5k = 1
+        sixk = 0.51
+        ninek = 0.38
+        twelvek = 0.32
+        fifteenk = 0.29
+        eighteenk = 0.26
+        twentyfourk = 0.24
+        fortyk = 0.2
+        sixtyk = 0.18
+        hundredk = 0.16
+        twohundredk = 0.14
+        fourhundredk = 0.13
+        sixhundredk = 0.11
+
+        try:
+            Ppu = 0
+            Ppk = 0
+            Ko = 0
+            nu = float(self.pu.get())
+            nk = float(self.pn.get())
+
+            if nu < 0 or nk < 0 or Ko < 0:
+                raise ValueError("Некорректные значения")
+
+            if nu in range(1, 15):
+                Ppu = one_14 * nu
+            elif nu in range(15, 20):
+                Ppu = ((twentyp - one_14) / (20 - 14) * (nu - 14) + one_14) * nu
+            elif nu in range(20, 30):
+                Ppu = ((thirtyp - twentyp) / (30 - 20) * (nu - 20) + twentyp) * nu
+            elif nu in range(30, 40):
+                Ppu = ((fortyp - thirtyp) / (40 - 30) * (nu - 30) + thirtyp) * nu
+            elif nu in range(40, 50):
+                Ppu = ((fiftyp - fortyp) / (50 - 40) * (nu - 40) + fortyp) * nu
+            elif nu in range(50, 60):
+                Ppu = ((sixtyp - fiftyp) / (60 - 50) * (nu - 50) + fiftyp) * nu
+            elif nu in range(60, 70):
+                Ppu = ((seventyp - sixtyp) / (70 - 60) * (nu - 60) + sixtyp) * nu
+            else:
+                Ppu = seventyp * nu
+
+            if nk in range(1, 6):
+                Ppk = Ppu * nk * one_5k
+            elif nk in range(6, 9):
+                Ppk = ((ninek - sixk) / (9 - 6) * (nk - 6) + sixk) * nk * Ppu
+            elif nk in range(9, 12):
+                Ppk = ((twelvek - ninek) / (12 - 9) * (nk - 9) + ninek) * nk * Ppu
+            elif nk in range(12, 15):
+                Ppk = ((fifteenk - twelvek) / (15 - 12) * (nk - 12) + twelvek) * nk * Ppu
+            elif nk in range(15, 18):
+                Ppk = ((eighteenk - fifteenk) / (18 - 15) * (nk - 15) + fifteenk) * nk * Ppu
+            elif nk in range(18, 24):
+                Ppk = ((twentyfourk - eighteenk) / (24 - 18) * (nk - 18) + eighteenk) * nk * Ppu
+            elif nk in range(24, 40):
+                Ppk = ((fortyk - twentyfourk) / (40 - 24) * (nk - 24) + twentyfourk) * nk * Ppu
+            elif nk in range(40, 60):
+                Ppk = ((sixtyk - fortyk) / (60 - 40) * (nk - 40) + fortyk) * nk * Ppu
+            elif nk in range(60, 100):
+                Ppk = ((hundredk - sixtyk) / (100 - 60) * (nk - 60) + sixtyk) * nk * Ppu
+            elif nk in range(100, 200):
+                Ppk = ((twohundredk - hundredk) / (200 - 100) * (nk - 100) + hundredk) * nk * Ppu
+            elif nk in range(200, 400):
+                Ppk = ((fourhundredk - twohundredk) / (400 - 200) * (nk - 200) + twohundredk) * nk * Ppu
+            elif nk in range(400, 600):
+                Ppk = ((sixhundredk - fourhundredk) / (600 - 400) * (nk - 400) + fourhundredk) * nk * Ppu
+            else:
+                Ppk = Ppu * nk * sixhundredk
+
+            self.result_ppp.config(text=f"Kc = {Ppu/nu:.3f}\n\nKo = {Ppk/(nk*Ppu):.3f}\n\nPp.кв = {Ppk:.2f} кВт")
+
+        except ValueError as e:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")
+
     def reset_single_phase(self):
         """Сброс данных однофазного расчета"""
         self.power_single.delete(0, tk.END)
@@ -695,7 +860,14 @@ class CurrentCalculator:
         self.pel.insert(0, "0")
         self.result_ppe.config(text="Результат: ")
 
-        
+    def reset_ppp(self):
+        """Сброс данных расчета нагрузок квартир ПК"""
+        self.pu.delete(0, tk.END)
+        self.pu.insert(0, "0")
+        self.pn.delete(0, tk.END)
+        self.pn.insert(0, "0")
+        self.result_ppp.config(text="Результат: ")
+
 
 
 def main():
